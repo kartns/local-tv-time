@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  displayName  String
+  passwordHash String
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+
+  watchedEpisodes WatchedEpisode[]
+  showTracking    ShowTracking[]
+  ratings         Rating[]
+  pushSubscriptions PushSubscription[]
+}
+
+model PushSubscription {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+}
+
+model ShowTracking {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  tmdbShowId Int
+  showName   String   @default("")
+  posterPath String?
+  status        String
+  tmdbStatus    String   @default("")
+  watchedCount  Int      @default(0)
+  totalEpisodes Int      @default(0)
+  addedAt       DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tmdbShowId])
+  @@index([userId])
+}
+
+model WatchedEpisode {
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  tmdbShowId     Int
+  seasonNumber   Int
+  episodeNumber  Int
+  showName       String   @default("")
+  episodeName    String   @default("")
+  runtimeMinutes Int?
+  watchedAt      DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tmdbShowId, seasonNumber, episodeNumber])
+  @@index([userId])
+  @@index([userId, tmdbShowId])
+}
+
+model Rating {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  tmdbShowId Int
+  seasonNum  Int?
+  episodeNum Int?
+  score      Float
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tmdbShowId, seasonNum, episodeNum])
+  @@index([userId])
+}
+
+model TmdbCache {
+  id        Int      @id @default(autoincrement())
+  cacheKey  String   @unique
+  data      String
+  cachedAt  DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([cacheKey])
+  @@index([expiresAt])
+}
