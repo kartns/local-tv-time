@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation';
 import { getShowDetails, getSeasonDetails } from '@/lib/tmdb';
 import UpcomingClient, { UpcomingEpisode } from './UpcomingClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function UpcomingPage() {
   const user = await getAuthUser();
   if (!user) redirect('/login');

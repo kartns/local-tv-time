@@ -1,6 +1,8 @@
 import { getTrending, getPopular } from '@/lib/tmdb';
 import DiscoverClient from './DiscoverClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function DiscoverPage() {
   const [trendRes, popRes] = await Promise.all([
     getTrending(),

@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation';
 import { getUserStats } from '@/lib/stats';
 import ProfileClient from './ProfileClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ProfilePage() {
   const user = await getAuthUser();
   if (!user) redirect('/login');

@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation';
 import { getShowDetails, getSeasonDetails } from '@/lib/tmdb';
 import ShowDetailClient from './ShowDetailClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ShowDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getAuthUser();
   if (!user) redirect('/login');
