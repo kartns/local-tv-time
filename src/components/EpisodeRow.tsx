@@ -27,10 +27,13 @@ export default function EpisodeRow({
 }: EpisodeRowProps) {
   const [loading, setLoading] = useState(false);
 
+  const todayStr = new Date().toISOString().split('T')[0];
+  const isFuture = airDate ? airDate > todayStr : false;
+
   const handleToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (loading) return;
+    if (loading || isFuture) return;
     setLoading(true);
     await onToggle(seasonNumber, episodeNumber, !isWatched, runtime, name);
     setLoading(false);
@@ -45,14 +48,15 @@ export default function EpisodeRow({
     : null;
 
   return (
-    <div className={`episode-row ${isWatched ? 'watched-row' : ''}`}>
+    <div className={`episode-row ${isWatched ? 'watched-row' : ''} ${isFuture ? 'future-row' : ''}`}>
       <button
-        className={`episode-row__check ${isWatched ? 'watched' : ''}`}
+        className={`episode-row__check ${isWatched ? 'watched' : ''} ${isFuture ? 'future' : ''}`}
         onClick={handleToggle}
-        disabled={loading}
-        title={isWatched ? 'Mark as unwatched' : 'Mark as watched'}
+        disabled={loading || isFuture}
+        title={isFuture ? 'Not aired yet' : isWatched ? 'Mark as unwatched' : 'Mark as watched'}
         aria-label={`${isWatched ? 'Unmark' : 'Mark'} ${showName} S${seasonNumber}E${episodeNumber} as watched`}
         aria-pressed={isWatched}
+        style={isFuture ? { opacity: 0.3, cursor: 'not-allowed' } : {}}
       >
         {isWatched && <Check size={16} strokeWidth={3} />}
         {loading && !isWatched && (
@@ -66,7 +70,9 @@ export default function EpisodeRow({
         </div>
         <div className="episode-row__title">{name}</div>
         {formattedDate && (
-          <div className="episode-row__date">{formattedDate}</div>
+          <div className="episode-row__date" style={isFuture ? { color: 'var(--accent)' } : {}}>
+            {isFuture ? `Airs ${formattedDate}` : formattedDate}
+          </div>
         )}
       </div>
     </div>
