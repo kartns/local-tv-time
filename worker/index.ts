@@ -43,3 +43,10 @@ self.addEventListener('notificationclick', (event) => {
     })
   );
 });
+
+// Chrome requires a fetch event listener for the app to be considered an installable PWA.
+self.addEventListener('fetch', (event) => {
+  // We can just leave this empty or pass through, next-pwa handles the rest if configured, 
+  // but a basic pass-through satisfies Chrome's installability requirement.
+  return;
+});
