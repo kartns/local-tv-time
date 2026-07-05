@@ -11,7 +11,7 @@ RUN npx prisma generate
 
 # Create a template database with the correct schema
 ENV DATABASE_URL=file:./template.db
-RUN npx prisma db push --skip-generate --accept-data-loss
+RUN npx prisma db push --accept-data-loss
 
 # Build Next.js
 ENV NEXT_TELEMETRY_DISABLED=1
