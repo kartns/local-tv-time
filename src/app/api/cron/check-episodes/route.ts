@@ -3,13 +3,14 @@ import { prisma } from '@/lib/db';
 import { getShowDetails } from '@/lib/tmdb';
 import webpush from 'web-push';
 
-webpush.setVapidDetails(
-  'mailto:hello@localtvtime.com',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
-
 export async function GET(req: Request) {
+  // Initialize VAPID at runtime (not build time) so Docker builds don't crash
+  webpush.setVapidDetails(
+    'mailto:hello@localtvtime.com',
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+    process.env.VAPID_PRIVATE_KEY!
+  );
+
   // Simple auth for cron: e.g., require an Authorization header or a secret key in query
   // For easy testing locally, we'll accept the JWT_SECRET as a query param or header
   const authHeader = req.headers.get('authorization');
