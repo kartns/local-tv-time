@@ -12,6 +12,22 @@ export default function DiscoverClient({ initialTrending, initialPopular }: { in
   const [searching, setSearching] = useState(false);
   const addToast = useToastStore((s) => s.addToast);
 
+  const searchTMDB = async (q: string) => {
+    try {
+      setSearching(true);
+      const res = await fetch(`/api/tmdb/search?q=${encodeURIComponent(q)}`);
+      if (res.ok) {
+        const data = await res.json();
+        // Filter out people/movies if it's multi-search, or just use TV
+        setSearchResults(data.results?.filter((r: any) => !r.media_type || r.media_type === 'tv') || []);
+      }
+    } catch {
+      addToast('Search failed', 'error');
+    } finally {
+      setSearching(false);
+    }
+  };
+
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (query.trim()) {
@@ -22,22 +38,6 @@ export default function DiscoverClient({ initialTrending, initialPopular }: { in
     }, 500);
     return () => clearTimeout(delayDebounceFn);
   }, [query]);
-
-  const searchTMDB = async (q: string) => {
-    try {
-      setSearching(true);
-      const res = await fetch(`/api/tmdb/search?q=${encodeURIComponent(q)}`);
-      if (res.ok) {
-        const data = await res.json();
-        // Filter out people/movies if it's multi-search, or just use TV
-        setSearchResults(data.results?.filter((r: any) => !r.media_type || r.media_type === 'tv') || []);
-      }
-    } catch (error) {
-      addToast('Search failed', 'error');
-    } finally {
-      setSearching(false);
-    }
-  };
 
   return (
     <div className="fade-in">

@@ -5,7 +5,6 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import { Tv, Plus } from 'lucide-react';
 import ShowCard from '@/components/ShowCard';
-import { useToastStore } from '@/stores/toast';
 import { useTrackingStore } from '@/stores/tracking';
 
 type ShowTracking = {
@@ -46,7 +45,6 @@ export default function ShowsClient({ initialShows }: { initialShows: ShowTracki
     }
   };
   
-  const addToast = useToastStore((s) => s.addToast);
   const lastUpdated = useTrackingStore((s) => s.lastUpdated);
 
   // Use SWR for data fetching, fallback to initialShows

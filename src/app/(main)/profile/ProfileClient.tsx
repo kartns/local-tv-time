@@ -29,17 +29,6 @@ export default function ProfileClient({ stats }: { stats: Stats }) {
   const [newListName, setNewListName] = useState('');
   const [creatingList, setCreatingList] = useState(false);
 
-  useEffect(() => {
-    fetchLists();
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
-      navigator.serviceWorker.ready.then((reg) => {
-        reg.pushManager.getSubscription().then((sub) => {
-          setIsSubscribed(!!sub);
-        });
-      });
-    }
-  }, []);
-
   const fetchLists = async () => {
     try {
       const res = await fetch('/api/lists');
@@ -53,6 +42,17 @@ export default function ProfileClient({ stats }: { stats: Stats }) {
       setLoadingLists(false);
     }
   };
+
+  useEffect(() => {
+    fetchLists();
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
+      navigator.serviceWorker.ready.then((reg) => {
+        reg.pushManager.getSubscription().then((sub) => {
+          setIsSubscribed(!!sub);
+        });
+      });
+    }
+  }, []);
 
   const handleCreateList = async (e: React.FormEvent) => {
     e.preventDefault();

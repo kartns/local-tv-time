@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useToastStore } from '@/stores/toast';
 import { useRouter } from 'next/navigation';
 import { Star, Check, Play, Pause, ListPlus, ChevronLeft, Calendar as CalendarIcon } from 'lucide-react';
@@ -121,7 +121,7 @@ export default function ShowDetailClient({
       } else {
         throw new Error('Failed');
       }
-    } catch (error) {
+    } catch {
       setTrackingStatus(prevStatus); // Revert
       addToast('Failed to update tracking', 'error');
     }
@@ -202,7 +202,7 @@ export default function ShowDetailClient({
 
         triggerUpdate();
       }
-    } catch (error) {
+    } catch {
       addToast('Failed to update episode', 'error');
       loadShowData(); // Revert to server truth on error
     }
@@ -436,7 +436,7 @@ export default function ShowDetailClient({
                 
                 addToast(`Marked ${allToMark.length} previous episodes as watched`);
                 triggerUpdate();
-              } catch (e) {
+              } catch {
                 addToast('Failed to mark previous episodes', 'error');
                 loadShowData(); // Revert
               }

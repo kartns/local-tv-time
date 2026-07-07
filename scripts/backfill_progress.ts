@@ -28,7 +28,7 @@ async function main() {
         totalEpisodes = getAiredEpisodesCount(data);
         tmdbStatus = data.status || '';
       }
-    } catch (e) {
+    } catch {
       console.error(`Failed to fetch TMDB for show ${show.tmdbShowId}`);
     }
 

@@ -27,7 +27,7 @@ export async function getUserStats(userId: number) {
   const mo = rem % 12;
   const y = Math.floor(rem / 12); // total years
 
-  let timeParts = [];
+  const timeParts = [];
   if (y > 0) timeParts.push(`${y}y`);
   if (mo > 0) timeParts.push(`${mo}mo`);
   if (d > 0) timeParts.push(`${d}d`);

@@ -13,10 +13,6 @@ export default function ListClient({ listId }: { listId: string }) {
   const [deleting, setDeleting] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
-  useEffect(() => {
-    fetchList();
-  }, [listId]);
-
   const fetchList = async () => {
     try {
       const res = await fetch(`/api/lists/${listId}`);
@@ -33,6 +29,10 @@ export default function ListClient({ listId }: { listId: string }) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchList();
+  }, [listId]);
 
   const handleDeleteList = async () => {
     setDeleting(true);
