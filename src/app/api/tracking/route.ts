@@ -16,21 +16,40 @@ export async function GET(req: NextRequest) {
 
     const todayStr = new Date().toISOString().split('T')[0];
 
-    for (const tracking of tracked) {
-      if (tracking.status === 'upcoming') {
+    // Find shows that might need a status update
+    const showsToCheck = tracked.filter(t => t.status === 'upcoming' || t.status === 'up_to_date');
+
+    if (showsToCheck.length > 0) {
+      // Fetch in parallel to avoid slowing down the response too much
+      await Promise.all(showsToCheck.map(async (tracking) => {
         try {
           const tmdbData = await getShowDetails(tracking.tmdbShowId);
-          if (tmdbData && tmdbData.first_air_date && tmdbData.first_air_date <= todayStr) {
-            tracking.status = 'watching';
+          if (!tmdbData) return;
+
+          let newStatus = tracking.status;
+
+          if (tracking.status === 'upcoming') {
+            if (tmdbData.first_air_date && tmdbData.first_air_date <= todayStr) {
+              newStatus = 'watching';
+            }
+          } else if (tracking.status === 'up_to_date') {
+            const airedCount = getAiredEpisodesCount(tmdbData);
+            if (airedCount > tracking.watchedCount) {
+              newStatus = 'watching';
+            }
+          }
+
+          if (newStatus !== tracking.status) {
+            tracking.status = newStatus;
             await prisma.showTracking.update({
               where: { id: tracking.id },
-              data: { status: 'watching' }
+              data: { status: newStatus, totalEpisodes: getAiredEpisodesCount(tmdbData) }
             });
           }
         } catch (e) {
-          console.error('Failed to update upcoming show', e);
+          console.error(`Failed to check status for show ${tracking.tmdbShowId}`, e);
         }
-      }
+      }));
     }
 
     return NextResponse.json({ tracked });

@@ -35,6 +35,12 @@ export default function ShowDetailClient({
     currentEpisode: any
   } | null>(null);
   const [showStopModal, setShowStopModal] = useState(false);
+  const [showListModal, setShowListModal] = useState(false);
+  
+  // Custom Lists State
+  const [userLists, setUserLists] = useState<any[]>([]);
+  const [showInLists, setShowInLists] = useState<Set<number>>(new Set());
+  const [listsLoading, setListsLoading] = useState(false);
 
   const addToast = useToastStore((s) => s.addToast);
   const triggerUpdate = useTrackingStore((s) => s.triggerUpdate);
@@ -46,6 +52,59 @@ export default function ShowDetailClient({
 
   const seasonData = activeSeason === initialSeasonData?.season_number ? initialSeasonData : fetchedSeasonData;
   const seasonLoading = isValidating && !fetchedSeasonData;
+
+  const handleOpenLists = async () => {
+    setShowListModal(true);
+    setListsLoading(true);
+    try {
+      const [listsRes, containsRes] = await Promise.all([
+        fetch('/api/lists'),
+        fetch(`/api/lists/contains?tmdbShowId=${showId}`)
+      ]);
+      
+      if (listsRes.ok && containsRes.ok) {
+        const listsData = await listsRes.json();
+        const containsData = await containsRes.json();
+        setUserLists(listsData);
+        setShowInLists(new Set(containsData.listIds));
+      }
+    } catch (err) {
+      console.error(err);
+      addToast('Failed to load lists', 'error');
+    } finally {
+      setListsLoading(false);
+    }
+  };
+
+  const toggleListMembership = async (listId: number) => {
+    const isMember = showInLists.has(listId);
+    
+    // Optimistic UI update
+    const newSet = new Set(showInLists);
+    if (isMember) {
+      newSet.delete(listId);
+    } else {
+      newSet.add(listId);
+    }
+    setShowInLists(newSet);
+
+    try {
+      if (isMember) {
+        await fetch(`/api/lists/${listId}/items?tmdbShowId=${showId}`, { method: 'DELETE' });
+      } else {
+        await fetch(`/api/lists/${listId}/items`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tmdbShowId: showId, showName: show.name, posterPath: show.poster_path })
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      addToast('Failed to update list', 'error');
+      // Revert optimistic update
+      setShowInLists(showInLists);
+    }
+  };
 
   const updateTracking = async (status: string) => {
     const prevStatus = trackingStatus;
@@ -232,6 +291,13 @@ export default function ShowDetailClient({
             </button>
           </>
         )}
+        <button 
+          className="btn btn-secondary btn-icon" 
+          onClick={handleOpenLists}
+          title="Save to Custom List"
+        >
+          <ListPlus size={20} />
+        </button>
       </div>
 
       <p className="text-secondary mb-lg" style={{ lineHeight: 1.6, fontSize: '0.95rem' }}>
@@ -405,6 +471,50 @@ export default function ShowDetailClient({
             }}
           >
             Stop Watching
+          </button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showListModal}
+        onClose={() => setShowListModal(false)}
+        title="Save to Custom List"
+      >
+        <div style={{ minHeight: 150 }}>
+          {listsLoading ? (
+            <div className="flex justify-center items-center h-full text-muted">Loading lists...</div>
+          ) : userLists.length === 0 ? (
+            <div className="text-center text-secondary py-lg">
+              You haven't created any custom lists yet. <br/><br/>
+              Go to your Profile to create one!
+            </div>
+          ) : (
+            <div className="flex flex-col gap-sm" style={{ maxHeight: 300, overflowY: 'auto' }}>
+              {userLists.map(list => (
+                <button
+                  key={list.id}
+                  onClick={() => toggleListMembership(list.id)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 16px',
+                    background: 'var(--bg-elevated)',
+                    borderRadius: 'var(--radius-sm)',
+                    border: `1px solid ${showInLists.has(list.id) ? 'var(--accent)' : 'var(--border-color)'}`,
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <span style={{ fontWeight: 500 }}>{list.name}</span>
+                  {showInLists.has(list.id) && <Check size={18} color="var(--accent)" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="modal-actions" style={{ marginTop: 16 }}>
+          <button className="btn btn-primary btn-block" onClick={() => setShowListModal(false)}>
+            Done
           </button>
         </div>
       </Modal>

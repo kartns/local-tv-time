@@ -24,18 +24,12 @@ export async function GET(req: Request) {
   try {
     // 1. Get all active subscriptions
     const subscriptions = await prisma.pushSubscription.findMany();
-    if (subscriptions.length === 0) {
-      return NextResponse.json({ message: 'No active subscriptions' });
-    }
 
-    // Group by user
-    const userIds = Array.from(new Set(subscriptions.map(s => s.userId)));
-
-    // 2. Fetch all tracked shows for these users
+    // 2. Fetch all tracked shows that are 'watching' or 'up_to_date' for ALL users
+    // (We want to update database state for everyone, even if they don't have push enabled)
     const trackedShows = await prisma.showTracking.findMany({
       where: {
-        userId: { in: userIds },
-        status: { in: ['watching', 'up_to_date'] }
+        status: { in: ['watching', 'up_to_date', 'upcoming'] }
       }
     });
 
@@ -61,14 +55,33 @@ export async function GET(req: Request) {
     
     let notificationsSent = 0;
 
-    // 4. Check who needs a notification
+    // 4. Check who needs a notification or database state update
     for (const tracking of trackedShows) {
       const showData = tmdbMap.get(tracking.tmdbShowId);
-      if (!showData || !showData.next_episode_to_air) continue;
+      if (!showData) continue;
+
+      // Handle upcoming -> watching
+      if (tracking.status === 'upcoming' && showData.first_air_date && showData.first_air_date <= todayStr) {
+        await prisma.showTracking.update({
+          where: { id: tracking.id },
+          data: { status: 'watching' }
+        });
+        continue;
+      }
+
+      if (!showData.next_episode_to_air) continue;
 
       const ep = showData.next_episode_to_air;
       
-      // If it airs today
+      // If the next episode airs today or earlier, the user is no longer up to date
+      if (ep.air_date <= todayStr && tracking.status === 'up_to_date') {
+        await prisma.showTracking.update({
+          where: { id: tracking.id },
+          data: { status: 'watching' }
+        });
+      }
+      
+      // If it airs today, send notifications
       if (ep.air_date === todayStr) {
         // Find subscriptions for this user
         const userSubs = subscriptions.filter(s => s.userId === tracking.userId);

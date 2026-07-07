@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/stores/auth';
-import { LogOut, User, Clock, Tv, Calendar, Bell, BellRing } from 'lucide-react';
+import { LogOut, User, Clock, Tv, Calendar, Bell, BellRing, List as ListIcon, Plus, ChevronRight, X } from 'lucide-react';
+import Link from 'next/link';
 
 type Stats = {
   totalHoursWatched: number;
@@ -21,7 +22,15 @@ export default function ProfileClient({ stats }: { stats: Stats }) {
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
 
+  // Custom Lists State
+  const [lists, setLists] = useState<any[]>([]);
+  const [loadingLists, setLoadingLists] = useState(true);
+  const [showNewListModal, setShowNewListModal] = useState(false);
+  const [newListName, setNewListName] = useState('');
+  const [creatingList, setCreatingList] = useState(false);
+
   useEffect(() => {
+    fetchLists();
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
       navigator.serviceWorker.ready.then((reg) => {
         reg.pushManager.getSubscription().then((sub) => {
@@ -30,6 +39,46 @@ export default function ProfileClient({ stats }: { stats: Stats }) {
       });
     }
   }, []);
+
+  const fetchLists = async () => {
+    try {
+      const res = await fetch('/api/lists');
+      if (res.ok) {
+        const data = await res.json();
+        setLists(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch lists:', err);
+    } finally {
+      setLoadingLists(false);
+    }
+  };
+
+  const handleCreateList = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newListName.trim()) return;
+    setCreatingList(true);
+    try {
+      const res = await fetch('/api/lists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newListName }),
+      });
+      if (res.ok) {
+        setNewListName('');
+        setShowNewListModal(false);
+        fetchLists();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to create list');
+      }
+    } catch (err) {
+      console.error('Failed to create list:', err);
+      alert('An error occurred');
+    } finally {
+      setCreatingList(false);
+    }
+  };
 
   const handlePushToggle = async () => {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
@@ -193,6 +242,53 @@ export default function ProfileClient({ stats }: { stats: Stats }) {
       </div>
 
       <div className="section slide-up" style={{ animationDelay: '0.6s' }}>
+        <div className="section-header">
+          <h2 className="section-title">My Custom Lists</h2>
+          <button 
+            className="btn btn-ghost btn-sm" 
+            onClick={() => setShowNewListModal(true)}
+            style={{ color: 'var(--accent)' }}
+          >
+            <Plus size={16} /> New List
+          </button>
+        </div>
+        
+        {loadingLists ? (
+          <div className="skeleton" style={{ height: 100, borderRadius: 'var(--radius-md)' }}></div>
+        ) : lists.length === 0 ? (
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', padding: '24px', textAlign: 'center' }}>
+            <ListIcon size={32} style={{ margin: '0 auto 12px', color: 'var(--text-muted)' }} />
+            <div style={{ fontWeight: 500, marginBottom: 4 }}>No custom lists yet</div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 16 }}>Create a list to organize your favorite shows!</div>
+            <button className="btn btn-primary btn-sm" onClick={() => setShowNewListModal(true)}>Create List</button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {lists.map(list => (
+              <Link href={`/lists/${list.id}`} key={list.id}>
+                <div style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'background var(--transition-fast)' }} className="hover:bg-var(--bg-elevated)">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div style={{ width: 48, height: 48, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                      {list.items && list.items.length > 0 && list.items[0].posterPath ? (
+                        <img src={`https://image.tmdb.org/t/p/w92${list.items[0].posterPath}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <ListIcon size={20} color="var(--text-muted)" />
+                      )}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '1rem', marginBottom: 2 }}>{list.name}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{list._count?.items || 0} shows</div>
+                    </div>
+                  </div>
+                  <ChevronRight size={20} color="var(--text-muted)" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="section slide-up" style={{ animationDelay: '0.7s' }}>
         <h2 className="section-title mb-md">Settings</h2>
         
         <div style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -241,6 +337,40 @@ export default function ProfileClient({ stats }: { stats: Stats }) {
         </div>
 
       </div>
+
+      {/* New List Modal */}
+      {showNewListModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: 400, overflow: 'hidden', animation: 'slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h3 style={{ fontWeight: 600, fontSize: '1.1rem' }}>Create New List</h3>
+              <button onClick={() => setShowNewListModal(false)} className="btn-icon">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleCreateList} style={{ padding: 20 }}>
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 8 }}>List Name</label>
+                <input 
+                  type="text" 
+                  value={newListName} 
+                  onChange={(e) => setNewListName(e.target.value)}
+                  placeholder="e.g. Anime, Favorites, To Watch"
+                  style={{ width: '100%' }}
+                  autoFocus
+                  required
+                />
+              </div>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+                <button type="button" className="btn btn-ghost" onClick={() => setShowNewListModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={creatingList || !newListName.trim()}>
+                  {creatingList ? 'Creating...' : 'Create List'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
