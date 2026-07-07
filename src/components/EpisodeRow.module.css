@@ -6,6 +6,11 @@
   border-radius: var(--radius-sm);
   transition: background var(--transition-fast);
   cursor: pointer;
+  position: relative;
+}
+
+.activeRow {
+  z-index: 100;
 }
 
 .episodeRow:hover {

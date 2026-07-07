@@ -79,7 +79,7 @@ export default function EpisodeRow({
     : null;
 
   return (
-    <div className={`${styles.episodeRow} ${optimisticWatched ? styles.watchedRow : ''} ${isFuture ? 'future-row' : ''}`}>
+    <div className={`${styles.episodeRow} ${optimisticWatched ? styles.watchedRow : ''} ${isFuture ? 'future-row' : ''} ${showPlayMenu ? styles.activeRow : ''}`}>
       <button
         className={`${styles.check} ${optimisticWatched ? styles.watched : ''} ${isFuture ? 'future' : ''}`}
         onClick={handleToggle}
