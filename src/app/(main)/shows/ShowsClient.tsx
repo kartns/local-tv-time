@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import useSWR from 'swr';
 import { Tv, Plus } from 'lucide-react';
 import ShowCard from '@/components/ShowCard';
 import { useToastStore } from '@/stores/toast';
@@ -28,8 +29,9 @@ const FILTER_TABS = [
   { id: 'all', label: 'All Shows' },
 ];
 
+const fetcher = (url: string) => fetch(url).then(res => res.json());
+
 export default function ShowsClient({ initialShows }: { initialShows: ShowTracking[] }) {
-  const [shows, setShows] = useState<ShowTracking[]>(initialShows);
   const [filter, setFilterState] = useState(() => {
     if (typeof window !== 'undefined') {
       return sessionStorage.getItem('showsFilter') || 'watching';
@@ -37,9 +39,6 @@ export default function ShowsClient({ initialShows }: { initialShows: ShowTracki
     return 'watching';
   });
   
-  // To prevent double fetch on mount, we use a ref to track if it's the initial render
-  const [isMounted, setIsMounted] = useState(false);
-
   const setFilter = (id: string) => {
     setFilterState(id);
     if (typeof window !== 'undefined') {
@@ -50,25 +49,23 @@ export default function ShowsClient({ initialShows }: { initialShows: ShowTracki
   const addToast = useToastStore((s) => s.addToast);
   const lastUpdated = useTrackingStore((s) => s.lastUpdated);
 
-  useEffect(() => {
-    if (!isMounted) {
-      setIsMounted(true);
-      return;
-    }
-    fetchShows();
-  }, [lastUpdated]);
+  // Use SWR for data fetching, fallback to initialShows
+  const { data, error, mutate } = useSWR('/api/tracking', fetcher, {
+    fallbackData: { tracked: initialShows },
+    revalidateOnFocus: true,
+  });
 
-  const fetchShows = async () => {
-    try {
-      const res = await fetch('/api/tracking');
-      if (res.ok) {
-        const data = await res.json();
-        setShows(data.tracked || []);
-      }
-    } catch (error) {
-      addToast('Failed to load updated shows', 'error');
-    }
-  };
+  // Revalidate SWR whenever lastUpdated changes from tracking store
+  useEffect(() => {
+    mutate();
+  }, [lastUpdated, mutate]);
+
+  if (error) {
+    // Show a toast if error occurs, but only once ideally
+    // addToast('Failed to load updated shows', 'error');
+  }
+
+  const shows: ShowTracking[] = data?.tracked || [];
 
   const filteredShows = shows.filter(s => {
     if (filter === 'all') return s.status !== 'dropped';

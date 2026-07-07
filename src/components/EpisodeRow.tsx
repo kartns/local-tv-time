@@ -1,10 +1,12 @@
 'use client';
 
-import { Check } from 'lucide-react';
-import { useState } from 'react';
+import { Check, Play, Tv, Globe, MonitorPlay, X } from 'lucide-react';
+import { useOptimistic, startTransition, useState, useRef, useEffect } from 'react';
+import styles from './EpisodeRow.module.css';
 
 interface EpisodeRowProps {
   showId: number;
+  imdbId?: string | null;
   seasonNumber: number;
   episodeNumber: number;
   name: string;
@@ -16,6 +18,8 @@ interface EpisodeRowProps {
 }
 
 export default function EpisodeRow({
+  showId,
+  imdbId,
   seasonNumber,
   episodeNumber,
   name,
@@ -25,18 +29,41 @@ export default function EpisodeRow({
   showName,
   onToggle,
 }: EpisodeRowProps) {
-  const [loading, setLoading] = useState(false);
+  // Use React 19's useOptimistic to provide instant UI feedback
+  const [optimisticWatched, addOptimisticWatched] = useOptimistic(
+    isWatched,
+    (state, newValue: boolean) => newValue
+  );
+  
+  const [showPlayMenu, setShowPlayMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowPlayMenu(false);
+      }
+    };
+    if (showPlayMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showPlayMenu]);
 
   const todayStr = new Date().toISOString().split('T')[0];
   const isFuture = airDate ? airDate > todayStr : false;
 
-  const handleToggle = async (e: React.MouseEvent) => {
+  const handleToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (loading || isFuture) return;
-    setLoading(true);
-    await onToggle(seasonNumber, episodeNumber, !isWatched, runtime, name);
-    setLoading(false);
+    if (isFuture) return;
+    
+    // We immediately update the UI, then kick off the async action
+    startTransition(() => {
+      addOptimisticWatched(!optimisticWatched);
+    });
+    
+    onToggle(seasonNumber, episodeNumber, !optimisticWatched, runtime, name);
   };
 
   const formattedDate = airDate
@@ -48,33 +75,99 @@ export default function EpisodeRow({
     : null;
 
   return (
-    <div className={`episode-row ${isWatched ? 'watched-row' : ''} ${isFuture ? 'future-row' : ''}`}>
+    <div className={`${styles.episodeRow} ${optimisticWatched ? styles.watchedRow : ''} ${isFuture ? 'future-row' : ''}`}>
       <button
-        className={`episode-row__check ${isWatched ? 'watched' : ''} ${isFuture ? 'future' : ''}`}
+        className={`${styles.check} ${optimisticWatched ? styles.watched : ''} ${isFuture ? 'future' : ''}`}
         onClick={handleToggle}
-        disabled={loading || isFuture}
-        title={isFuture ? 'Not aired yet' : isWatched ? 'Mark as unwatched' : 'Mark as watched'}
-        aria-label={`${isWatched ? 'Unmark' : 'Mark'} ${showName} S${seasonNumber}E${episodeNumber} as watched`}
-        aria-pressed={isWatched}
+        disabled={isFuture}
+        title={isFuture ? 'Not aired yet' : optimisticWatched ? 'Mark as unwatched' : 'Mark as watched'}
+        aria-label={`${optimisticWatched ? 'Unmark' : 'Mark'} ${showName} S${seasonNumber}E${episodeNumber} as watched`}
+        aria-pressed={optimisticWatched}
         style={isFuture ? { opacity: 0.3, cursor: 'not-allowed' } : {}}
       >
-        {isWatched && <Check size={16} strokeWidth={3} />}
-        {loading && !isWatched && (
-          <div style={{ width: 12, height: 12, border: '2px solid var(--text-muted)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
-        )}
+        {optimisticWatched && <Check size={16} strokeWidth={3} />}
       </button>
-      <div className="episode-row__info">
-        <div className="episode-row__number">
+      <div className={styles.info}>
+        <div className={styles.number}>
           Episode {episodeNumber}
           {runtime && <span> · {runtime} min</span>}
         </div>
-        <div className="episode-row__title">{name}</div>
+        <div className={styles.title}>{name}</div>
         {formattedDate && (
-          <div className="episode-row__date" style={isFuture ? { color: 'var(--accent)' } : {}}>
+          <div className={styles.date} style={isFuture ? { color: 'var(--accent)' } : {}}>
             {isFuture ? `Airs ${formattedDate}` : formattedDate}
           </div>
         )}
       </div>
+      
+      {!isFuture && (
+        <div className={styles.actions} ref={menuRef}>
+          <button 
+            className={styles.playBtn}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowPlayMenu(!showPlayMenu);
+            }}
+            title="Play options"
+          >
+            {showPlayMenu ? <X size={14} /> : <Play size={14} fill="currentColor" />}
+          </button>
+          
+          {showPlayMenu && (
+            <div className={styles.playMenu}>
+              {imdbId ? (
+                <>
+                  <a 
+                    href={`stremio://detail/series/${imdbId}/${seasonNumber}/${episodeNumber}`}
+                    className={styles.menuItem}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Tv size={16} /> Stremio (App)
+                  </a>
+                  <a 
+                    href={`https://web.stremio.com/#/detail/series/${imdbId}/${seasonNumber}/${episodeNumber}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.menuItem}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Globe size={16} /> Stremio (Web)
+                  </a>
+                </>
+              ) : (
+                <>
+                  <a 
+                    href={`stremio://detail/series/tmdb:${showId}/${seasonNumber}/${episodeNumber}`}
+                    className={styles.menuItem}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Tv size={16} /> Stremio (App)
+                  </a>
+                  <a 
+                    href={`https://web.stremio.com/#/detail/series/tmdb:${showId}/${seasonNumber}/${episodeNumber}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.menuItem}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Globe size={16} /> Stremio (Web)
+                  </a>
+                </>
+              )}
+              <a 
+                href={`https://www.themoviedb.org/tv/${showId}/watch`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.menuItem}
+                onClick={(e) => e.stopPropagation()}
+                style={{ borderTop: '1px solid var(--border-color)' }}
+              >
+                <MonitorPlay size={16} /> Official Providers
+              </a>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { Star, Check, Play, Pause, ListPlus, ChevronLeft, Calendar as CalendarIc
 import EpisodeRow from '@/components/EpisodeRow';
 import Modal from '@/components/Modal';
 import { useTrackingStore } from '@/stores/tracking';
+import useSWR from 'swr';
 
 type TrackingStatus = 'watching' | 'watchlist' | 'up_to_date' | 'finished' | 'dropped' | 'paused' | 'upcoming' | null;
 
@@ -27,9 +28,7 @@ export default function ShowDetailClient({
   
   const [trackingStatus, setTrackingStatus] = useState<TrackingStatus>(initialTrackingStatus);
   const [activeSeason, setActiveSeason] = useState<number>(initialSeasonData?.season_number || 1);
-  const [seasonData, setSeasonData] = useState<any>(initialSeasonData);
   const [watchedEpisodes, setWatchedEpisodes] = useState<{ seasonNumber: number; episodeNumber: number }[]>(initialWatchedEpisodes);
-  const [seasonLoading, setSeasonLoading] = useState(false);
   
   const [batchPrompt, setBatchPrompt] = useState<{
     unwatchedPrevious: any[],
@@ -40,28 +39,13 @@ export default function ShowDetailClient({
   const addToast = useToastStore((s) => s.addToast);
   const triggerUpdate = useTrackingStore((s) => s.triggerUpdate);
 
-  useEffect(() => {
-    // If activeSeason changes from initial, we fetch it
-    if (activeSeason !== initialSeasonData?.season_number) {
-      loadSeasonData(activeSeason);
-    } else {
-      setSeasonData(initialSeasonData);
-    }
-  }, [activeSeason, initialSeasonData]);
+  const { data: fetchedSeasonData, isValidating } = useSWR(
+    activeSeason !== initialSeasonData?.season_number ? `/api/tmdb/show/${showId}/season/${activeSeason}` : null,
+    (url) => fetch(url).then(res => res.json())
+  );
 
-  const loadSeasonData = async (seasonNum: number) => {
-    try {
-      setSeasonLoading(true);
-      const res = await fetch(`/api/tmdb/show/${showId}/season/${seasonNum}`);
-      if (res.ok) {
-        setSeasonData(await res.json());
-      }
-    } catch (error) {
-      console.error('Failed to load season');
-    } finally {
-      setSeasonLoading(false);
-    }
-  };
+  const seasonData = activeSeason === initialSeasonData?.season_number ? initialSeasonData : fetchedSeasonData;
+  const seasonLoading = isValidating && !fetchedSeasonData;
 
   const updateTracking = async (status: string) => {
     const prevStatus = trackingStatus;
@@ -293,6 +277,7 @@ export default function ShowDetailClient({
                   <EpisodeRow
                     key={ep.id}
                     showId={showId}
+                    imdbId={show.external_ids?.imdb_id}
                     showName={show.name}
                     seasonNumber={ep.season_number}
                     episodeNumber={ep.episode_number}

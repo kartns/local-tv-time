@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Tv, Compass, User, Calendar } from 'lucide-react';
+import styles from './BottomNav.module.css';
 
 const navItems = [
   { href: '/shows', label: 'Shows', icon: Tv },
@@ -15,7 +16,7 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="bottom-nav" aria-label="Main navigation">
+    <nav className={styles.bottomNav} aria-label="Main navigation">
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive = pathname.startsWith(item.href);
@@ -23,7 +24,7 @@ export default function BottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`nav-item ${isActive ? 'active' : ''}`}
+            className={`${styles.navItem} ${isActive ? styles.active : ''}`}
             aria-current={isActive ? 'page' : undefined}
           >
             <Icon size={24} />

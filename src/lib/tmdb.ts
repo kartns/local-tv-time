@@ -51,7 +51,7 @@ export async function searchMulti(query: string, page = 1) {
 export async function getShowDetails(showId: number) {
   return fetchTMDB<TMDBShowDetails>(`/tv/${showId}`, {
     language: 'en-US',
-    append_to_response: 'credits,recommendations,watch/providers,images',
+    append_to_response: 'credits,recommendations,watch/providers,images,external_ids',
   });
 }
 
@@ -189,6 +189,10 @@ export interface TMDBShowDetails {
   images?: {
     backdrops: { file_path: string }[];
     posters: { file_path: string }[];
+  };
+  external_ids?: {
+    imdb_id?: string | null;
+    tvdb_id?: number | null;
   };
 }
 

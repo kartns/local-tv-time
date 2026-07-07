@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import styles from './ShowCard.module.css';
 
 interface ShowCardProps {
   id: number;
@@ -19,18 +20,18 @@ export default function ShowCard({ id, name, posterPath, year, progress, episode
     : null;
 
   return (
-    <Link href={`/shows/${id}`} className="show-card">
+    <Link href={`/shows/${id}`} className={styles.showCard}>
       {posterUrl ? (
         <Image
           src={posterUrl}
           alt={name}
           width={342}
           height={342}
-          className="show-card__poster"
+          className={styles.poster}
           unoptimized
         />
       ) : (
-        <div className="show-card__poster" style={{
+        <div className={styles.poster} style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -44,9 +45,9 @@ export default function ShowCard({ id, name, posterPath, year, progress, episode
         </div>
       )}
       {progress !== undefined && progress > 0 && (
-        <div className="show-card__progress">
+        <div className={styles.progress}>
           <div
-            className="show-card__progress-bar"
+            className={styles.progressBar}
             style={{ 
               width: `${Math.min(progress, 100)}%`,
               background: status === 'dropped' ? 'var(--error)' : (status === 'up_to_date' || status === 'finished') ? 'var(--success)' : 'var(--accent)',
@@ -55,10 +56,10 @@ export default function ShowCard({ id, name, posterPath, year, progress, episode
           />
         </div>
       )}
-      <div className="show-card__info">
-        <div className="show-card__title">{name}</div>
+      <div className={styles.info}>
+        <div className={styles.title}>{name}</div>
         {(year || episodeInfo) && (
-          <div className="show-card__meta">
+          <div className={styles.meta}>
             {episodeInfo || year}
           </div>
         )}
