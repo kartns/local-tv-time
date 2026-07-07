@@ -1,31 +1,24 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { verifyToken } from '@/lib/auth';
-import { cookies } from 'next/headers';
+import { getAuthUser } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const cookieStore = cookies();
-    const token = cookieStore.get('token')?.value;
+    const payload = await getAuthUser();
 
-    if (!token) {
+    if (!payload || !payload.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const payload = await verifyToken(token);
-    if (!payload || !payload.userId) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    const userId = payload.userId as string;
+    const userId = Number(payload.userId);
 
     // Fetch all user data
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
-        trackedShows: true,
+        showTracking: true,
         watchedEpisodes: true,
         ratings: true,
       },
@@ -44,24 +37,31 @@ export async function GET() {
         displayName: user.displayName,
         avatarUrl: user.avatarUrl,
       },
-      trackedShows: user.trackedShows.map(s => ({
-        showId: s.showId,
+      trackedShows: user.showTracking.map(s => ({
+        tmdbShowId: s.tmdbShowId,
+        showName: s.showName,
+        posterPath: s.posterPath,
         status: s.status,
-        createdAt: s.createdAt.toISOString(),
+        tmdbStatus: s.tmdbStatus,
+        watchedCount: s.watchedCount,
+        totalEpisodes: s.totalEpisodes,
+        addedAt: s.addedAt ? new Date(s.addedAt).toISOString() : new Date().toISOString(),
       })),
       watchedEpisodes: user.watchedEpisodes.map(e => ({
-        showId: e.showId,
-        episodeId: e.episodeId,
+        tmdbShowId: e.tmdbShowId,
         seasonNumber: e.seasonNumber,
         episodeNumber: e.episodeNumber,
-        watchedAt: e.watchedAt.toISOString(),
+        showName: e.showName,
+        episodeName: e.episodeName,
+        runtimeMinutes: e.runtimeMinutes,
+        watchedAt: e.watchedAt ? new Date(e.watchedAt).toISOString() : new Date().toISOString(),
       })),
       ratings: user.ratings.map(r => ({
-        showId: r.showId,
-        episodeId: r.episodeId,
+        tmdbShowId: r.tmdbShowId,
+        seasonNum: r.seasonNum,
+        episodeNum: r.episodeNum,
         score: r.score,
-        review: r.review,
-        createdAt: r.createdAt.toISOString(),
+        createdAt: r.createdAt ? new Date(r.createdAt).toISOString() : new Date().toISOString(),
       })),
     };
 
@@ -74,19 +74,13 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const cookieStore = cookies();
-    const token = cookieStore.get('token')?.value;
+    const payload = await getAuthUser();
 
-    if (!token) {
+    if (!payload || !payload.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const payload = await verifyToken(token);
-    if (!payload || !payload.userId) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    const userId = payload.userId as string;
+    const userId = payload.userId;
     const backupData = await request.json();
 
     if (!backupData || !backupData.trackedShows || !backupData.watchedEpisodes) {
@@ -105,9 +99,14 @@ export async function POST(request: Request) {
         await tx.showTracking.createMany({
           data: backupData.trackedShows.map((s: any) => ({
             userId,
-            showId: s.showId,
+            tmdbShowId: s.tmdbShowId,
+            showName: s.showName || "",
+            posterPath: s.posterPath || null,
             status: s.status,
-            createdAt: s.createdAt ? new Date(s.createdAt) : new Date(),
+            tmdbStatus: s.tmdbStatus || "",
+            watchedCount: s.watchedCount || 0,
+            totalEpisodes: s.totalEpisodes || 0,
+            addedAt: s.addedAt ? new Date(s.addedAt) : new Date(),
             updatedAt: new Date(),
           })),
         });
@@ -118,10 +117,12 @@ export async function POST(request: Request) {
         await tx.watchedEpisode.createMany({
           data: backupData.watchedEpisodes.map((e: any) => ({
             userId,
-            showId: e.showId,
-            episodeId: e.episodeId,
+            tmdbShowId: e.tmdbShowId,
             seasonNumber: e.seasonNumber,
             episodeNumber: e.episodeNumber,
+            showName: e.showName || "",
+            episodeName: e.episodeName || "",
+            runtimeMinutes: e.runtimeMinutes || null,
             watchedAt: e.watchedAt ? new Date(e.watchedAt) : new Date(),
           })),
         });
@@ -132,12 +133,11 @@ export async function POST(request: Request) {
         await tx.rating.createMany({
           data: backupData.ratings.map((r: any) => ({
             userId,
-            showId: r.showId,
-            episodeId: r.episodeId,
+            tmdbShowId: r.tmdbShowId,
+            seasonNum: r.seasonNum || null,
+            episodeNum: r.episodeNum || null,
             score: r.score,
-            review: r.review || null,
             createdAt: r.createdAt ? new Date(r.createdAt) : new Date(),
-            updatedAt: new Date(),
           })),
         });
       }
