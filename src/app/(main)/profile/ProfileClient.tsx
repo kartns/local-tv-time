@@ -18,6 +18,9 @@ export default function ProfileClient({ stats }: { stats: Stats }) {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
 
+  const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
+
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
       navigator.serviceWorker.ready.then((reg) => {
@@ -63,6 +66,63 @@ export default function ProfileClient({ stats }: { stats: Stats }) {
       alert('Failed to toggle push notifications. Please check browser permissions.');
     } finally {
       setSubscribing(false);
+    }
+  };
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const res = await fetch('/api/backup');
+      if (!res.ok) throw new Error('Export failed');
+      const data = await res.json();
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tvtime-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to export data');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!confirm('WARNING: Importing will overwrite all your current tracked shows and watched history! Are you sure?')) {
+      e.target.value = ''; // Reset input
+      return;
+    }
+
+    setImporting(true);
+    try {
+      const text = await file.text();
+      const backupData = JSON.parse(text);
+
+      const res = await fetch('/api/backup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(backupData),
+      });
+
+      if (!res.ok) throw new Error('Import failed');
+      
+      alert('Data imported successfully! Refreshing page...');
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to import data. Ensure the JSON file is valid.');
+    } finally {
+      setImporting(false);
+      e.target.value = '';
     }
   };
 
@@ -134,7 +194,8 @@ export default function ProfileClient({ stats }: { stats: Stats }) {
 
       <div className="section slide-up" style={{ animationDelay: '0.6s' }}>
         <h2 className="section-title mb-md">Settings</h2>
-        <div style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        
+        <div style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
           <div>
             <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               {isSubscribed ? <BellRing size={18} color="var(--accent)" /> : <Bell size={18} />}
@@ -151,6 +212,34 @@ export default function ProfileClient({ stats }: { stats: Stats }) {
             {subscribing ? 'Wait...' : isSubscribed ? 'Disable' : 'Enable'}
           </button>
         </div>
+
+        <div style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', padding: '16px', marginBottom: 12 }}>
+          <div style={{ fontWeight: 600, marginBottom: 4 }}>Data Management</div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 16 }}>
+            Backup your tracked shows and watch history, or restore from a previous backup.
+          </div>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <button 
+              className="btn btn-secondary" 
+              onClick={handleExport}
+              disabled={exporting}
+              style={{ flex: 1 }}
+            >
+              {exporting ? 'Exporting...' : 'Export Backup'}
+            </button>
+            <label className="btn btn-secondary" style={{ flex: 1, cursor: 'pointer', textAlign: 'center' }}>
+              {importing ? 'Importing...' : 'Import Backup'}
+              <input 
+                type="file" 
+                accept=".json" 
+                style={{ display: 'none' }}
+                onChange={handleImport}
+                disabled={importing}
+              />
+            </label>
+          </div>
+        </div>
+
       </div>
     </div>
   );

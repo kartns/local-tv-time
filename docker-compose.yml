@@ -13,7 +13,7 @@ services:
       - TMDB_API_KEY=${TMDB_API_KEY}
       - TMDB_ACCESS_TOKEN=${TMDB_ACCESS_TOKEN}
       - JWT_SECRET=${JWT_SECRET}
-      - DATABASE_URL=file:./data/tvtime.db
+      - DATABASE_URL=file:/app/prisma/data/tvtime.db
       - NEXT_PUBLIC_VAPID_PUBLIC_KEY=${NEXT_PUBLIC_VAPID_PUBLIC_KEY}
       - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY}
     restart: unless-stopped
