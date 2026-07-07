@@ -286,6 +286,8 @@ export default function ShowDetailClient({
                     runtime={ep.runtime}
                     isWatched={isWatched}
                     onToggle={toggleEpisode}
+                    providers={providers}
+                    providerLink={show['watch/providers']?.results?.['US']?.link || `https://www.themoviedb.org/tv/${showId}/watch`}
                   />
                 );
               })}

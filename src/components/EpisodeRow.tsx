@@ -14,6 +14,8 @@ interface EpisodeRowProps {
   runtime: number | null;
   isWatched: boolean;
   showName: string;
+  providers?: any[];
+  providerLink?: string;
   onToggle: (seasonNumber: number, episodeNumber: number, watched: boolean, runtime: number | null, episodeName: string) => void;
 }
 
@@ -27,6 +29,8 @@ export default function EpisodeRow({
   runtime,
   isWatched,
   showName,
+  providers = [],
+  providerLink,
   onToggle,
 }: EpisodeRowProps) {
   // Use React 19's useOptimistic to provide instant UI feedback
@@ -118,14 +122,14 @@ export default function EpisodeRow({
               {imdbId ? (
                 <>
                   <a 
-                    href={`stremio://detail/series/${imdbId}/${seasonNumber}/${episodeNumber}`}
+                    href={`stremio://detail/series/${imdbId}/${imdbId}:${seasonNumber}:${episodeNumber}`}
                     className={styles.menuItem}
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Tv size={16} /> Stremio (App)
                   </a>
                   <a 
-                    href={`https://web.stremio.com/#/detail/series/${imdbId}/${seasonNumber}/${episodeNumber}`}
+                    href={`https://web.stremio.com/#/detail/series/${imdbId}/${imdbId}:${seasonNumber}:${episodeNumber}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={styles.menuItem}
@@ -137,14 +141,14 @@ export default function EpisodeRow({
               ) : (
                 <>
                   <a 
-                    href={`stremio://detail/series/tmdb:${showId}/${seasonNumber}/${episodeNumber}`}
+                    href={`stremio://detail/series/tmdb:${showId}/tmdb:${showId}:${seasonNumber}:${episodeNumber}`}
                     className={styles.menuItem}
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Tv size={16} /> Stremio (App)
                   </a>
                   <a 
-                    href={`https://web.stremio.com/#/detail/series/tmdb:${showId}/${seasonNumber}/${episodeNumber}`}
+                    href={`https://web.stremio.com/#/detail/series/tmdb:${showId}/tmdb:${showId}:${seasonNumber}:${episodeNumber}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={styles.menuItem}
@@ -154,16 +158,36 @@ export default function EpisodeRow({
                   </a>
                 </>
               )}
-              <a 
-                href={`https://www.themoviedb.org/tv/${showId}/watch`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.menuItem}
-                onClick={(e) => e.stopPropagation()}
-                style={{ borderTop: '1px solid var(--border-color)' }}
-              >
-                <MonitorPlay size={16} /> Official Providers
-              </a>
+              {providers && providers.length > 0 ? (
+                <>
+                  <div style={{ borderTop: '1px solid var(--border-color)', margin: '4px 0' }} />
+                  <div style={{ padding: '4px 16px', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.05em' }}>Official Providers</div>
+                  {providers.map((p: any) => (
+                    <a 
+                      key={p.provider_id}
+                      href={providerLink || `https://www.themoviedb.org/tv/${showId}/watch`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.menuItem}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <img src={`https://image.tmdb.org/t/p/w45${p.logo_path}`} alt={p.provider_name} style={{ width: 16, height: 16, borderRadius: 2 }} />
+                      {p.provider_name}
+                    </a>
+                  ))}
+                </>
+              ) : (
+                <a 
+                  href={providerLink || `https://www.themoviedb.org/tv/${showId}/watch`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.menuItem}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{ borderTop: '1px solid var(--border-color)' }}
+                >
+                  <MonitorPlay size={16} /> Official Providers
+                </a>
+              )}
             </div>
           )}
         </div>
