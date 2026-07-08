@@ -47,3 +47,13 @@ export type Rating = Prisma.RatingModel
  * 
  */
 export type TmdbCache = Prisma.TmdbCacheModel
+/**
+ * Model CustomList
+ * 
+ */
+export type CustomList = Prisma.CustomListModel
+/**
+ * Model CustomListItem
+ * 
+ */
+export type CustomListItem = Prisma.CustomListItemModel

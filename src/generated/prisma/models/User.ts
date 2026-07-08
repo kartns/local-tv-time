@@ -228,6 +228,7 @@ export type UserWhereInput = {
   showTracking?: Prisma.ShowTrackingListRelationFilter
   ratings?: Prisma.RatingListRelationFilter
   pushSubscriptions?: Prisma.PushSubscriptionListRelationFilter
+  customLists?: Prisma.CustomListListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -241,6 +242,7 @@ export type UserOrderByWithRelationInput = {
   showTracking?: Prisma.ShowTrackingOrderByRelationAggregateInput
   ratings?: Prisma.RatingOrderByRelationAggregateInput
   pushSubscriptions?: Prisma.PushSubscriptionOrderByRelationAggregateInput
+  customLists?: Prisma.CustomListOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -257,6 +259,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   showTracking?: Prisma.ShowTrackingListRelationFilter
   ratings?: Prisma.RatingListRelationFilter
   pushSubscriptions?: Prisma.PushSubscriptionListRelationFilter
+  customLists?: Prisma.CustomListListRelationFilter
 }, "id" | "username">
 
 export type UserOrderByWithAggregationInput = {
@@ -295,6 +298,7 @@ export type UserCreateInput = {
   showTracking?: Prisma.ShowTrackingCreateNestedManyWithoutUserInput
   ratings?: Prisma.RatingCreateNestedManyWithoutUserInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  customLists?: Prisma.CustomListCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -308,6 +312,7 @@ export type UserUncheckedCreateInput = {
   showTracking?: Prisma.ShowTrackingUncheckedCreateNestedManyWithoutUserInput
   ratings?: Prisma.RatingUncheckedCreateNestedManyWithoutUserInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  customLists?: Prisma.CustomListUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -320,6 +325,7 @@ export type UserUpdateInput = {
   showTracking?: Prisma.ShowTrackingUpdateManyWithoutUserNestedInput
   ratings?: Prisma.RatingUpdateManyWithoutUserNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  customLists?: Prisma.CustomListUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -333,6 +339,7 @@ export type UserUncheckedUpdateInput = {
   showTracking?: Prisma.ShowTrackingUncheckedUpdateManyWithoutUserNestedInput
   ratings?: Prisma.RatingUncheckedUpdateManyWithoutUserNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  customLists?: Prisma.CustomListUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -477,6 +484,20 @@ export type UserUpdateOneRequiredWithoutRatingsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRatingsInput, Prisma.UserUpdateWithoutRatingsInput>, Prisma.UserUncheckedUpdateWithoutRatingsInput>
 }
 
+export type UserCreateNestedOneWithoutCustomListsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCustomListsInput, Prisma.UserUncheckedCreateWithoutCustomListsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCustomListsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutCustomListsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCustomListsInput, Prisma.UserUncheckedCreateWithoutCustomListsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCustomListsInput
+  upsert?: Prisma.UserUpsertWithoutCustomListsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCustomListsInput, Prisma.UserUpdateWithoutCustomListsInput>, Prisma.UserUncheckedUpdateWithoutCustomListsInput>
+}
+
 export type UserCreateWithoutPushSubscriptionsInput = {
   username: string
   displayName: string
@@ -486,6 +507,7 @@ export type UserCreateWithoutPushSubscriptionsInput = {
   watchedEpisodes?: Prisma.WatchedEpisodeCreateNestedManyWithoutUserInput
   showTracking?: Prisma.ShowTrackingCreateNestedManyWithoutUserInput
   ratings?: Prisma.RatingCreateNestedManyWithoutUserInput
+  customLists?: Prisma.CustomListCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
@@ -498,6 +520,7 @@ export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
   watchedEpisodes?: Prisma.WatchedEpisodeUncheckedCreateNestedManyWithoutUserInput
   showTracking?: Prisma.ShowTrackingUncheckedCreateNestedManyWithoutUserInput
   ratings?: Prisma.RatingUncheckedCreateNestedManyWithoutUserInput
+  customLists?: Prisma.CustomListUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPushSubscriptionsInput = {
@@ -525,6 +548,7 @@ export type UserUpdateWithoutPushSubscriptionsInput = {
   watchedEpisodes?: Prisma.WatchedEpisodeUpdateManyWithoutUserNestedInput
   showTracking?: Prisma.ShowTrackingUpdateManyWithoutUserNestedInput
   ratings?: Prisma.RatingUpdateManyWithoutUserNestedInput
+  customLists?: Prisma.CustomListUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
@@ -537,6 +561,7 @@ export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
   watchedEpisodes?: Prisma.WatchedEpisodeUncheckedUpdateManyWithoutUserNestedInput
   showTracking?: Prisma.ShowTrackingUncheckedUpdateManyWithoutUserNestedInput
   ratings?: Prisma.RatingUncheckedUpdateManyWithoutUserNestedInput
+  customLists?: Prisma.CustomListUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutShowTrackingInput = {
@@ -548,6 +573,7 @@ export type UserCreateWithoutShowTrackingInput = {
   watchedEpisodes?: Prisma.WatchedEpisodeCreateNestedManyWithoutUserInput
   ratings?: Prisma.RatingCreateNestedManyWithoutUserInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  customLists?: Prisma.CustomListCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutShowTrackingInput = {
@@ -560,6 +586,7 @@ export type UserUncheckedCreateWithoutShowTrackingInput = {
   watchedEpisodes?: Prisma.WatchedEpisodeUncheckedCreateNestedManyWithoutUserInput
   ratings?: Prisma.RatingUncheckedCreateNestedManyWithoutUserInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  customLists?: Prisma.CustomListUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutShowTrackingInput = {
@@ -587,6 +614,7 @@ export type UserUpdateWithoutShowTrackingInput = {
   watchedEpisodes?: Prisma.WatchedEpisodeUpdateManyWithoutUserNestedInput
   ratings?: Prisma.RatingUpdateManyWithoutUserNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  customLists?: Prisma.CustomListUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutShowTrackingInput = {
@@ -599,6 +627,7 @@ export type UserUncheckedUpdateWithoutShowTrackingInput = {
   watchedEpisodes?: Prisma.WatchedEpisodeUncheckedUpdateManyWithoutUserNestedInput
   ratings?: Prisma.RatingUncheckedUpdateManyWithoutUserNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  customLists?: Prisma.CustomListUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutWatchedEpisodesInput = {
@@ -610,6 +639,7 @@ export type UserCreateWithoutWatchedEpisodesInput = {
   showTracking?: Prisma.ShowTrackingCreateNestedManyWithoutUserInput
   ratings?: Prisma.RatingCreateNestedManyWithoutUserInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  customLists?: Prisma.CustomListCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWatchedEpisodesInput = {
@@ -622,6 +652,7 @@ export type UserUncheckedCreateWithoutWatchedEpisodesInput = {
   showTracking?: Prisma.ShowTrackingUncheckedCreateNestedManyWithoutUserInput
   ratings?: Prisma.RatingUncheckedCreateNestedManyWithoutUserInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  customLists?: Prisma.CustomListUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWatchedEpisodesInput = {
@@ -649,6 +680,7 @@ export type UserUpdateWithoutWatchedEpisodesInput = {
   showTracking?: Prisma.ShowTrackingUpdateManyWithoutUserNestedInput
   ratings?: Prisma.RatingUpdateManyWithoutUserNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  customLists?: Prisma.CustomListUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWatchedEpisodesInput = {
@@ -661,6 +693,7 @@ export type UserUncheckedUpdateWithoutWatchedEpisodesInput = {
   showTracking?: Prisma.ShowTrackingUncheckedUpdateManyWithoutUserNestedInput
   ratings?: Prisma.RatingUncheckedUpdateManyWithoutUserNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  customLists?: Prisma.CustomListUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRatingsInput = {
@@ -672,6 +705,7 @@ export type UserCreateWithoutRatingsInput = {
   watchedEpisodes?: Prisma.WatchedEpisodeCreateNestedManyWithoutUserInput
   showTracking?: Prisma.ShowTrackingCreateNestedManyWithoutUserInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  customLists?: Prisma.CustomListCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRatingsInput = {
@@ -684,6 +718,7 @@ export type UserUncheckedCreateWithoutRatingsInput = {
   watchedEpisodes?: Prisma.WatchedEpisodeUncheckedCreateNestedManyWithoutUserInput
   showTracking?: Prisma.ShowTrackingUncheckedCreateNestedManyWithoutUserInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  customLists?: Prisma.CustomListUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRatingsInput = {
@@ -711,6 +746,7 @@ export type UserUpdateWithoutRatingsInput = {
   watchedEpisodes?: Prisma.WatchedEpisodeUpdateManyWithoutUserNestedInput
   showTracking?: Prisma.ShowTrackingUpdateManyWithoutUserNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  customLists?: Prisma.CustomListUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRatingsInput = {
@@ -722,6 +758,73 @@ export type UserUncheckedUpdateWithoutRatingsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   watchedEpisodes?: Prisma.WatchedEpisodeUncheckedUpdateManyWithoutUserNestedInput
   showTracking?: Prisma.ShowTrackingUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  customLists?: Prisma.CustomListUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutCustomListsInput = {
+  username: string
+  displayName: string
+  passwordHash: string
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  watchedEpisodes?: Prisma.WatchedEpisodeCreateNestedManyWithoutUserInput
+  showTracking?: Prisma.ShowTrackingCreateNestedManyWithoutUserInput
+  ratings?: Prisma.RatingCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutCustomListsInput = {
+  id?: number
+  username: string
+  displayName: string
+  passwordHash: string
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  watchedEpisodes?: Prisma.WatchedEpisodeUncheckedCreateNestedManyWithoutUserInput
+  showTracking?: Prisma.ShowTrackingUncheckedCreateNestedManyWithoutUserInput
+  ratings?: Prisma.RatingUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutCustomListsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCustomListsInput, Prisma.UserUncheckedCreateWithoutCustomListsInput>
+}
+
+export type UserUpsertWithoutCustomListsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCustomListsInput, Prisma.UserUncheckedUpdateWithoutCustomListsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCustomListsInput, Prisma.UserUncheckedCreateWithoutCustomListsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCustomListsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCustomListsInput, Prisma.UserUncheckedUpdateWithoutCustomListsInput>
+}
+
+export type UserUpdateWithoutCustomListsInput = {
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  watchedEpisodes?: Prisma.WatchedEpisodeUpdateManyWithoutUserNestedInput
+  showTracking?: Prisma.ShowTrackingUpdateManyWithoutUserNestedInput
+  ratings?: Prisma.RatingUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCustomListsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  watchedEpisodes?: Prisma.WatchedEpisodeUncheckedUpdateManyWithoutUserNestedInput
+  showTracking?: Prisma.ShowTrackingUncheckedUpdateManyWithoutUserNestedInput
+  ratings?: Prisma.RatingUncheckedUpdateManyWithoutUserNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -735,6 +838,7 @@ export type UserCountOutputType = {
   showTracking: number
   ratings: number
   pushSubscriptions: number
+  customLists: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -742,6 +846,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   showTracking?: boolean | UserCountOutputTypeCountShowTrackingArgs
   ratings?: boolean | UserCountOutputTypeCountRatingsArgs
   pushSubscriptions?: boolean | UserCountOutputTypeCountPushSubscriptionsArgs
+  customLists?: boolean | UserCountOutputTypeCountCustomListsArgs
 }
 
 /**
@@ -782,6 +887,13 @@ export type UserCountOutputTypeCountPushSubscriptionsArgs<ExtArgs extends runtim
   where?: Prisma.PushSubscriptionWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCustomListsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CustomListWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -794,6 +906,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   showTracking?: boolean | Prisma.User$showTrackingArgs<ExtArgs>
   ratings?: boolean | Prisma.User$ratingsArgs<ExtArgs>
   pushSubscriptions?: boolean | Prisma.User$pushSubscriptionsArgs<ExtArgs>
+  customLists?: boolean | Prisma.User$customListsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -830,6 +943,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   showTracking?: boolean | Prisma.User$showTrackingArgs<ExtArgs>
   ratings?: boolean | Prisma.User$ratingsArgs<ExtArgs>
   pushSubscriptions?: boolean | Prisma.User$pushSubscriptionsArgs<ExtArgs>
+  customLists?: boolean | Prisma.User$customListsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -842,6 +956,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     showTracking: Prisma.$ShowTrackingPayload<ExtArgs>[]
     ratings: Prisma.$RatingPayload<ExtArgs>[]
     pushSubscriptions: Prisma.$PushSubscriptionPayload<ExtArgs>[]
+    customLists: Prisma.$CustomListPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1248,6 +1363,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   showTracking<T extends Prisma.User$showTrackingArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$showTrackingArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShowTrackingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ratings<T extends Prisma.User$ratingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ratingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RatingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   pushSubscriptions<T extends Prisma.User$pushSubscriptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$pushSubscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PushSubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  customLists<T extends Prisma.User$customListsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$customListsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CustomListPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1767,6 +1883,30 @@ export type User$pushSubscriptionsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.PushSubscriptionScalarFieldEnum | Prisma.PushSubscriptionScalarFieldEnum[]
+}
+
+/**
+ * User.customLists
+ */
+export type User$customListsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CustomList
+   */
+  select?: Prisma.CustomListSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CustomList
+   */
+  omit?: Prisma.CustomListOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CustomListInclude<ExtArgs> | null
+  where?: Prisma.CustomListWhereInput
+  orderBy?: Prisma.CustomListOrderByWithRelationInput | Prisma.CustomListOrderByWithRelationInput[]
+  cursor?: Prisma.CustomListWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CustomListScalarFieldEnum | Prisma.CustomListScalarFieldEnum[]
 }
 
 /**

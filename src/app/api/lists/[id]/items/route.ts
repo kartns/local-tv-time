@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getAuthUser } from '@/lib/auth';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getAuthUser(req);
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const listId = parseInt(params.id, 10);
+    const { id } = await params;
+    const listId = parseInt(id, 10);
     if (isNaN(listId)) {
       return NextResponse.json({ error: 'Invalid list ID' }, { status: 400 });
     }
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     // Verify ownership
     const list = await prisma.customList.findFirst({
-      where: { id: listId, userId: user.id },
+      where: { id: listId, userId: user.userId },
     });
 
     if (!list) {
@@ -48,14 +49,15 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getAuthUser(req);
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const listId = parseInt(params.id, 10);
+    const { id } = await params;
+    const listId = parseInt(id, 10);
     if (isNaN(listId)) {
       return NextResponse.json({ error: 'Invalid list ID' }, { status: 400 });
     }
@@ -68,7 +70,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     // Verify ownership
     const list = await prisma.customList.findFirst({
-      where: { id: listId, userId: user.id },
+      where: { id: listId, userId: user.userId },
     });
 
     if (!list) {

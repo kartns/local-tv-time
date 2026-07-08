@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     const listItems = await prisma.customListItem.findMany({
       where: {
         tmdbShowId,
-        list: { userId: user.id } // only lists owned by this user
+        list: { userId: user.userId } // only lists owned by this user
       },
       select: {
         listId: true

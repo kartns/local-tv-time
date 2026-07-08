@@ -56,7 +56,9 @@ export const ModelName = {
   ShowTracking: 'ShowTracking',
   WatchedEpisode: 'WatchedEpisode',
   Rating: 'Rating',
-  TmdbCache: 'TmdbCache'
+  TmdbCache: 'TmdbCache',
+  CustomList: 'CustomList',
+  CustomListItem: 'CustomListItem'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -150,6 +152,29 @@ export const TmdbCacheScalarFieldEnum = {
 } as const
 
 export type TmdbCacheScalarFieldEnum = (typeof TmdbCacheScalarFieldEnum)[keyof typeof TmdbCacheScalarFieldEnum]
+
+
+export const CustomListScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CustomListScalarFieldEnum = (typeof CustomListScalarFieldEnum)[keyof typeof CustomListScalarFieldEnum]
+
+
+export const CustomListItemScalarFieldEnum = {
+  id: 'id',
+  listId: 'listId',
+  tmdbShowId: 'tmdbShowId',
+  showName: 'showName',
+  posterPath: 'posterPath',
+  addedAt: 'addedAt'
+} as const
+
+export type CustomListItemScalarFieldEnum = (typeof CustomListItemScalarFieldEnum)[keyof typeof CustomListItemScalarFieldEnum]
 
 
 export const SortOrder = {

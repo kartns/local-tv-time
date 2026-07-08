@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     }
 
     const lists = await prisma.customList.findMany({
-      where: { userId: user.id },
+      where: { userId: user.userId },
       include: {
         _count: { select: { items: true } },
         items: {
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     const list = await prisma.customList.create({
       data: {
-        userId: user.id,
+        userId: user.userId,
         name: name.trim(),
       },
     });
