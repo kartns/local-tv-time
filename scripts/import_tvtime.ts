@@ -33,8 +33,9 @@ const mapStatus = (tvTimeStatus: string) => {
 
 async function main() {
   const username = process.argv[2];
-  if (!username) {
-    console.error('Usage: npx tsx scripts/import_tvtime.ts <username>');
+  const backupFilename = process.argv[3];
+  if (!username || !backupFilename) {
+    console.error('Usage: npx tsx scripts/import_tvtime.ts <username> <backup_file.json>');
     process.exit(1);
   }
 
@@ -53,7 +54,7 @@ async function main() {
 
   console.log(`Starting import for user: ${user.username} (ID: ${user.id})`);
 
-  const backupFile = path.resolve(process.cwd(), 'tvtime-series-2026-07-03.json');
+  const backupFile = path.resolve(process.cwd(), backupFilename);
   console.log(`Reading backup file from ${backupFile}`);
   const rawData = fs.readFileSync(backupFile, 'utf-8');
   const shows = JSON.parse(rawData);
