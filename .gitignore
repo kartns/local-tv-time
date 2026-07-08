@@ -47,3 +47,6 @@ next-env.d.ts
 *.sqlite3
 /prisma/data/
 /data/
+
+# backups
+tvtime-*.json
