@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Local TV Time 📺
 
-## Getting Started
+A self-hosted, private TV show tracking application built as a modern alternative to apps like TV Time. Keep track of what you're watching, what you've finished, and get notified when new episodes drop—all on your own server.
 
-First, run the development server:
+![Local TV Time Demo](./public/icons/icon-192.png)
 
+## Features
+- **Track TV Shows:** Search and add shows using The Movie Database (TMDB) API.
+- **Smart Tracking:** Automatically organizes shows into *Watching*, *Up to Date*, *Finished*, or *Dropped*.
+- **Push Notifications:** Get alerted in your browser or phone when a new episode airs.
+- **Custom Lists:** Organize your shows exactly how you want.
+- **Privacy First:** Self-hosted with a local SQLite database. No data sharing. No ads.
+- **Progressive Web App (PWA):** Installable on iOS and Android devices directly from your browser.
+- **Import/Export:** Back up your entire library to a `.json` file at any time.
+
+---
+
+## Deployment (Docker)
+
+The absolute easiest way to deploy this application on a VPS or home server is using Docker Compose.
+
+### 1. Clone the repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/yourusername/local-tv-time.git
+cd local-tv-time
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Configure Environment Variables
+Copy the example environment file:
+```bash
+cp .env.example .env
+```
+Edit the `.env` file and fill in your details:
+- Get your **TMDB API Key** from [themoviedb.org](https://www.themoviedb.org/settings/api).
+- Generate a random string for your **JWT_SECRET**.
+- Generate VAPID keys for push notifications by running `npx web-push generate-vapid-keys` and paste them into the `.env` file.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Start the Server
+Run Docker Compose:
+```bash
+docker compose up -d --build
+```
+The app will be available on port `3000`. We recommend putting it behind a reverse proxy like Caddy or Nginx to serve it over HTTPS (which is **required** for Push Notifications and PWA installation).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Local Development
 
-To learn more about Next.js, take a look at the following resources:
+If you want to run the project locally for development or customization:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Install dependencies
+npm install
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Setup your local .env file
+cp .env.example .env
 
-## Deploy on Vercel
+# Run database migrations
+npx prisma db push
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Start the development server
+npm run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open [http://localhost:3000](http://localhost:3000) with your browser.
+
+## Tech Stack
+- **Framework:** [Next.js 16](https://nextjs.org/) (App Router)
+- **Database:** SQLite via [Prisma ORM](https://www.prisma.io/)
+- **UI:** Custom CSS / Lucide React Icons
+- **Data Source:** [TMDB API](https://developer.themoviedb.org/reference/intro/getting-started)
