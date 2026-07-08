@@ -120,16 +120,11 @@ export default function ListClient({ listId }: { listId: string }) {
         <div className="show-grid slide-up">
           {list.items.map((item: any) => (
             <div key={item.id} style={{ position: 'relative' }}>
-              <Link href={`/shows/${item.tmdbShowId}`}>
                 <ShowCard
-                  show={{
-                    id: item.tmdbShowId,
-                    name: item.showName,
-                    poster_path: item.posterPath,
-                  }}
-                  hideProgressBar
+                  id={item.tmdbShowId}
+                  name={item.showName}
+                  posterPath={item.posterPath}
                 />
-              </Link>
               <button
                 onClick={(e) => handleRemoveItem(e, item.tmdbShowId)}
                 className="btn-icon"
