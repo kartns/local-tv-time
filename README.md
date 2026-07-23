@@ -42,6 +42,36 @@ docker compose up -d --build
 ```
 The app will be available on port `3000`. We recommend putting it behind a reverse proxy like Caddy or Nginx to serve it over HTTPS (which is **required** for Push Notifications and PWA installation).
 
+### Alternative: Deployment with Tailscale (Private HTTPS/VPN)
+
+If you don't want to expose your app to the public internet but still want HTTPS (required for Push Notifications and PWA installation), you can deploy using the dedicated Tailscale sidecar file.
+
+1. **Configure Tailscale Auth:**
+   Generate a Tailscale auth key in your [Tailscale Console](https://login.tailscale.com/admin/settings/keys) and add it to your `.env` file:
+   ```env
+   TS_AUTHKEY=tskey-auth-your-key-here
+   ```
+
+2. **Start the Tailscale Stack:**
+   ```bash
+   docker compose -f docker-compose.tailscale.yml up -d
+   ```
+
+3. **Log in / Verify Connection:**
+   If your auth key wasn't supplied or has expired, you can log in interactively by running:
+   ```bash
+   docker exec -it tailscale-tvtime tailscale up --accept-dns=false
+   ```
+   *(Click the login link printed in the terminal to authorize the container).*
+
+4. **Enable Tailscale Serve (HTTPS):**
+   Instruct the Tailscale sidecar to serve HTTPS (port 443) and proxy it to Next.js in the background:
+   ```bash
+   docker exec -it tailscale-tvtime tailscale serve --bg http://localhost:3000
+   ```
+
+Your app will now be securely available on your tailnet at `https://pi-tvtime.<your-tailnet-name>.ts.net/` with a valid SSL certificate.
+
 ---
 
 ## Local Development

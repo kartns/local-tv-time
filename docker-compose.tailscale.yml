@@ -1,0 +1,43 @@
+services:
+  # 1. Tailscale container sidecar for TV Time
+  tailscale-tvtime:
+    image: tailscale/tailscale:latest
+    container_name: tailscale-tvtime
+    hostname: pi-tvtime  # This defines the domain: pi-tvtime.tailad81cb.ts.net
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY:-}  # Can be defined in your .env file
+      - TS_STATE_DIR=/var/lib/tailscale
+    volumes:
+      - tailscale-tvtime-state:/var/lib/tailscale
+    devices:
+      - /dev/net/tun:/dev/net/tun  # Mounted as a device for proper kernel TUN access
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    ports:
+      - 3000:3000  # Exposes port 3000 to the host local network
+    restart: unless-stopped
+
+  # 2. Local TV Time application service
+  tvtime:
+    build: 
+      context: .
+      args:
+        - NEXT_PUBLIC_VAPID_PUBLIC_KEY=${NEXT_PUBLIC_VAPID_PUBLIC_KEY}
+    container_name: local-tv-time
+    network_mode: service:tailscale-tvtime  # Join the tailscale-tvtime network stack
+    volumes:
+      - tvtime-data:/app/prisma/data
+    environment:
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - TMDB_ACCESS_TOKEN=${TMDB_ACCESS_TOKEN}
+      - JWT_SECRET=${JWT_SECRET}
+      - DATABASE_URL=file:/app/prisma/data/tvtime.db
+      - NEXT_PUBLIC_VAPID_PUBLIC_KEY=${NEXT_PUBLIC_VAPID_PUBLIC_KEY}
+      - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY}
+    restart: unless-stopped
+
+volumes:
+  tvtime-data:
+    driver: local
+  tailscale-tvtime-state:
