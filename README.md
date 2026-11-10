@@ -1,8 +1,22 @@
 # Local TV Time 📺
 
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
+![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)
+![Prisma](https://img.shields.io/badge/Prisma-SQLite-2D3748?logo=prisma)
+![Tailscale](https://img.shields.io/badge/Tailscale-Supported-2072EF?logo=tailscale)
+
 A self-hosted, private TV show tracking application built as a modern alternative to apps like TV Time. Keep track of what you're watching, what you've finished, and get notified when new episodes drop—all on your own server.
 
-![Local TV Time Demo](./public/icons/icon-192.png)
+![Local TV Time Screenshot](./docs/screenshot.png)
+
+## Table of Contents
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Deployment (Docker)](#deployment-docker)
+- [Local Development](#local-development)
+- [Tech Stack](#tech-stack)
+
+---
 
 ## Features
 - **Track TV Shows:** Search and add shows using The Movie Database (TMDB) API.
@@ -15,9 +29,18 @@ A self-hosted, private TV show tracking application built as a modern alternativ
 
 ---
 
+## Prerequisites
+- **Docker & Docker Compose** (for production deployment)
+- **Node.js 18+** & **npm** (for local development)
+- **TMDB API Key** (free from [themoviedb.org](https://www.themoviedb.org/settings/api))
+
+---
+
 ## Deployment (Docker)
 
 The absolute easiest way to deploy this application on a VPS or home server is using Docker Compose.
+
+> ⚠️ **Important:** You must serve this application over HTTPS (e.g., behind a reverse proxy like Nginx or Caddy, or via Tailscale Serve) in order for **Push Notifications** and **PWA installation** to function properly.
 
 ### 1. Clone the repository
 ```bash
@@ -32,7 +55,7 @@ cp .env.example .env
 ```
 Edit the `.env` file and fill in your details:
 - Get your **TMDB API Key** from [themoviedb.org](https://www.themoviedb.org/settings/api).
-- Generate a random string for your **JWT_SECRET**.
+- Generate a random string for your **JWT_SECRET** (e.g., `openssl rand -base64 32`).
 - Generate VAPID keys for push notifications by running `npx web-push generate-vapid-keys` and paste them into the `.env` file.
 
 ### 3. Start the Server
@@ -40,9 +63,13 @@ Run Docker Compose:
 ```bash
 docker compose up -d --build
 ```
-The app will be available on port `3000`. We recommend putting it behind a reverse proxy like Caddy or Nginx to serve it over HTTPS (which is **required** for Push Notifications and PWA installation).
+The app will be available on port `3000`. We recommend putting it behind a reverse proxy like Caddy or Nginx to serve it over HTTPS.
 
-### Alternative: Deployment with Tailscale (Private HTTPS/VPN)
+<br>
+
+<details>
+<summary><b>Alternative: Deployment with Tailscale (Private HTTPS/VPN)</b></summary>
+<br>
 
 If you don't want to expose your app to the public internet but still want HTTPS (required for Push Notifications and PWA installation), you can deploy using the dedicated Tailscale sidecar file.
 
@@ -72,6 +99,8 @@ If you don't want to expose your app to the public internet but still want HTTPS
 
 Your app will now be securely available on your tailnet at `https://pi-tvtime.<your-tailnet-name>.ts.net/` with a valid SSL certificate.
 
+</details>
+
 ---
 
 ## Local Development
@@ -93,6 +122,8 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser.
+
+---
 
 ## Tech Stack
 - **Framework:** [Next.js 16](https://nextjs.org/) (App Router)

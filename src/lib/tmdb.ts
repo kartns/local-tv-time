@@ -1,3 +1,5 @@
+import { unstable_cache } from 'next/cache';
+
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p';
 
@@ -8,7 +10,11 @@ function getHeaders(): HeadersInit {
   };
 }
 
-async function fetchTMDB<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
+async function fetchTMDB<T>(
+  endpoint: string,
+  params?: Record<string, string>,
+  { noStore = false }: { noStore?: boolean } = {}
+): Promise<T> {
   const url = new URL(`${TMDB_BASE_URL}${endpoint}`);
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
@@ -18,7 +24,7 @@ async function fetchTMDB<T>(endpoint: string, params?: Record<string, string>): 
 
   const response = await fetch(url.toString(), {
     headers: getHeaders(),
-    next: { revalidate: 3600 }, // Cache for 1 hour
+    ...(noStore ? { cache: 'no-store' as const } : { next: { revalidate: 3600 } }), // Cache for 1 hour
   });
 
   if (!response.ok) {
@@ -55,10 +61,43 @@ export async function getShowDetails(showId: number) {
   });
 }
 
+// Raw season responses can exceed Next's 2MB data-cache limit (each episode carries
+// full crew/guest_stars lists), so fetch uncached, keep only the fields we use,
+// and cache the trimmed result instead.
+const getCachedSeasonDetails = unstable_cache(
+  async (showId: number, seasonNumber: number): Promise<TMDBSeason> => {
+    const raw = await fetchTMDB<TMDBSeason>(
+      `/tv/${showId}/season/${seasonNumber}`,
+      { language: 'en-US' },
+      { noStore: true }
+    );
+    return {
+      id: raw.id,
+      name: raw.name,
+      overview: raw.overview,
+      poster_path: raw.poster_path,
+      season_number: raw.season_number,
+      air_date: raw.air_date,
+      episodes: (raw.episodes ?? []).map((e) => ({
+        id: e.id,
+        name: e.name,
+        overview: e.overview,
+        still_path: e.still_path,
+        air_date: e.air_date,
+        episode_number: e.episode_number,
+        season_number: e.season_number,
+        runtime: e.runtime,
+        vote_average: e.vote_average,
+        vote_count: e.vote_count,
+      })),
+    };
+  },
+  ['tmdb-season'],
+  { revalidate: 3600 }
+);
+
 export async function getSeasonDetails(showId: number, seasonNumber: number) {
-  return fetchTMDB<TMDBSeason>(`/tv/${showId}/season/${seasonNumber}`, {
-    language: 'en-US',
-  });
+  return getCachedSeasonDetails(showId, seasonNumber);
 }
 
 export async function getEpisodeDetails(showId: number, seasonNumber: number, episodeNumber: number) {
